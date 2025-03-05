@@ -1,23 +1,23 @@
-# MCP PDF Toolkit
+# MCP PDF Forms
 
-A PDF manipulation toolkit built with [MCP](https://github.com/llama-index-ai/mcp) and PyMuPDF.
+A PDF form manipulation toolkit built with [MCP](https://github.com/llama-index-ai/mcp) and PyMuPDF.
 
 ## Features
 
 - Find PDF files across multiple directories
 - Extract form field information from PDF files
-- Fill out PDF forms programmatically
+- Visualize form fields in PDF documents
 
 ## Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/mcp-pdf.git
-cd mcp-pdf
+# Install package from PyPI
+pip install mcp_pdf_forms
 
-# Install dependencies with uv
-uv venv
-uv add "mcp[cli]" pymupdf
+# Or install from source
+git clone https://github.com/Wildebeest/mcp_pdf_forms.git
+cd mcp_pdf_forms
+pip install -e .
 ```
 
 ## Server
@@ -26,28 +26,15 @@ The server component provides PDF-related tools via MCP's API:
 
 ```bash
 # Start the server with one or more directories to scan for PDFs
-python server.py /path/to/pdfs /another/path
+uv run -m mcp_pdf_forms.server examples
 ```
 
-## Client
+## Usage
 
-The client provides a command-line interface to interact with the server:
+Once installed, you can use the package to work with PDF forms. The package provides both an API and a command-line interface.
 
-```bash
-# List all PDFs in the configured directories
-python examples/client.py --list
-
-# Filter PDFs by a specific string
-python examples/client.py --list --filter "invoice"
-
-# Extract form fields from a PDF
-python examples/client.py --form-fields /path/to/form.pdf
-
-# Fill a PDF form
-python examples/client.py --fill-form /path/to/form.pdf --output /path/to/output.pdf --data '{"field1": "value1", "field2": "value2"}'
-
-# Fill a PDF form using a JSON file
-python examples/client.py --fill-form /path/to/form.pdf --output /path/to/output.pdf --data /path/to/data.json
+```python
+# Example API usage coming soon
 ```
 
 ## Libraries Used

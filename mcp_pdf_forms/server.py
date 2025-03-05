@@ -9,7 +9,7 @@ from PIL import Image as PILImage, ImageDraw
 from mcp.server.fastmcp import FastMCP, Image
 
 # Create a named server
-mcp = FastMCP("PDF Finder", dependencies=["pymupdf", "pillow"])
+mcp = FastMCP("PDF Forms", dependencies=["pymupdf", "pillow"])
 
 # Global variable to store base paths
 BASE_PATHS = []
@@ -64,7 +64,7 @@ def extract_form_fields(pdf_path: str) -> Dict[str, Any]:
         doc = fitz.open(pdf_path)
         result = {}
 
-        # Get form fields using widget iteration (compatible with PyMuPDF 1.25.3)
+        # Get form fields using widget iteration
         for page in doc:
             for widget in page.widgets():
                 field_name = widget.field_name
@@ -157,9 +157,19 @@ def highlight_form_field(pdf_path: str, field_name: str) -> Image:
         raise Exception(f"Error highlighting form field: {str(e)}")
 
 
+
+
+def start_server(paths=None):
+    """Start the MCP PDF Forms server with the specified paths"""
+    global BASE_PATHS
+    if paths:
+        BASE_PATHS = paths
+    mcp.run()
+
+
 if __name__ == "__main__":
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description="PDF Finder MCP Server")
+    parser = argparse.ArgumentParser(description="PDF Forms MCP Server")
     parser.add_argument("paths", nargs="+", help="Base paths to search for PDF files")
     args = parser.parse_args()
 
@@ -167,4 +177,4 @@ if __name__ == "__main__":
     BASE_PATHS = args.paths
 
     # Run the server
-    mcp.run()
+    start_server()
