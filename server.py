@@ -60,91 +60,27 @@ def extract_form_fields(pdf_path: str) -> Dict[str, Any]:
         doc = fitz.open(pdf_path)
         result = {}
         
-        # Get form fields
-        fields = doc.get_form_text_fields()
-        for field_name, field_value in fields.items():
-            result[field_name] = {
-                "type": "text",
-                "value": field_value
-            }
-            
-        # Get additional form field types
-        for widget in doc.first_page.widgets():
-            field_name = widget.field_name
-            field_type = widget.field_type
-            field_value = widget.field_value
-            field_type_name = widget.field_type_string
-            
-            if field_name not in result:
-                result[field_name] = {
-                    "type": field_type_name.lower(),
-                    "value": field_value,
-                    "field_type_id": field_type
-                }
+        # Get form fields using widget iteration (compatible with PyMuPDF 1.25.3)
+        for page in doc:
+            for widget in page.widgets():
+                field_name = widget.field_name
+                field_value = widget.field_value
+                field_type = widget.field_type
+                field_type_name = widget.field_type_string
+                
+                # Only add if not already in results
+                if field_name not in result:
+                    result[field_name] = {
+                        "type": field_type_name.lower(),
+                        "value": field_value,
+                        "field_type_id": field_type
+                    }
         
         doc.close()
         return result
     except Exception as e:
         return {"error": str(e)}
     
-@mcp.tool()
-def fill_pdf_form(pdf_path: str, output_path: str, field_data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Fill PDF form fields with provided data
-    
-    Args:
-        pdf_path: Path to the PDF file with form fields
-        output_path: Path to save the filled PDF
-        field_data: Dictionary of field names and values to fill
-        
-    Returns:
-        Status dictionary with success flag and message
-    """
-    try:
-        doc = fitz.open(pdf_path)
-        
-        # Fill form fields
-        for field_name, value in field_data.items():
-            # For text fields
-            try:
-                doc.fill_textfield(field_name, str(value))
-            except:
-                pass
-                
-            # For other field types (checkboxes, radio buttons, etc.)
-            try:
-                widgets = []
-                for page in doc:
-                    for widget in page.widgets():
-                        if widget.field_name == field_name:
-                            widgets.append(widget)
-                
-                if widgets:
-                    for widget in widgets:
-                        if widget.field_type_string == "CheckBox":
-                            widget.field_value = value in (True, "Yes", "yes", "true", "True", "X", "x", "on", "1")
-                        elif widget.field_type_string == "Radio":
-                            widget.field_value = value
-                        elif widget.field_type_string == "ListBox" or widget.field_type_string == "ComboBox":
-                            widget.field_value = value
-                            
-                        widget.update()
-            except:
-                pass
-        
-        # Save filled PDF
-        doc.save(output_path)
-        doc.close()
-        
-        return {
-            "success": True,
-            "message": f"Form filled and saved to {output_path}"
-        }
-    except Exception as e:
-        return {
-            "success": False,
-            "error": str(e)
-        }
 
 if __name__ == "__main__":
     # Parse command line arguments
