@@ -29,6 +29,12 @@ The server component provides PDF-related tools via MCP's API:
 uv run -m mcp_pdf_forms.server examples
 ```
 
+Or to add to claude-code:
+
+```bash
+claude mcp add pdf-forms uv run -- --with mcp-pdf-forms -m mcp_pdf_forms.server .
+```
+
 ## Usage
 
 Once installed, you can use the package to work with PDF forms. The package provides tools through the MCP interface.
