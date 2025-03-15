@@ -157,6 +157,49 @@ def highlight_form_field(pdf_path: str, field_name: str) -> Image:
         raise Exception(f"Error highlighting form field: {str(e)}")
 
 
+@mcp.tool()
+def render_pdf_page(pdf_path: str, page_num: int = 0, zoom: float = 2.0) -> Image:
+    """
+    Generate an image of a PDF page without any highlighting
+    
+    Args:
+        pdf_path: Path to the PDF file
+        page_num: Page number to render (0-indexed)
+        zoom: Zoom factor for rendering (higher values for better quality)
+        
+    Returns:
+        Image of the specified page
+    """
+    try:
+        doc = fitz.open(pdf_path)
+        
+        # Check if page number is valid
+        if page_num < 0 or page_num >= len(doc):
+            raise ValueError(f"Page number {page_num} is out of range (0-{len(doc)-1})")
+            
+        # Get the requested page
+        page = doc[page_num]
+        
+        # Render the page as an image
+        mat = fitz.Matrix(zoom, zoom)
+        pix = page.get_pixmap(matrix=mat)
+        
+        # Convert to PIL Image
+        img = PILImage.frombytes("RGB", [pix.width, pix.height], pix.samples)
+        
+        # Convert to bytes
+        buffer = io.BytesIO()
+        img.save(buffer, format="PNG")
+        img_bytes = buffer.getvalue()
+        
+        doc.close()
+        
+        # Return MCP Image object
+        return Image(data=img_bytes, format="png")
+    except Exception as e:
+        raise Exception(f"Error rendering PDF page: {str(e)}")
+
+
 
 
 def start_server(paths=None):
