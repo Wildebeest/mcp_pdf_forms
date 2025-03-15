@@ -1,7 +1,8 @@
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union, Tuple
 import os
 import argparse
+import re
 import fitz  # PyMuPDF
 import io
 from PIL import Image as PILImage, ImageDraw
@@ -198,6 +199,148 @@ def render_pdf_page(pdf_path: str, page_num: int = 0, zoom: float = 2.0) -> Imag
         return Image(data=img_bytes, format="png")
     except Exception as e:
         raise Exception(f"Error rendering PDF page: {str(e)}")
+
+
+@mcp.tool()
+def extract_text(pdf_path: str, start_page: Optional[int] = None, end_page: Optional[int] = None) -> Union[str, Dict[int, str]]:
+    """
+    Extract text from PDF pages
+    
+    Args:
+        pdf_path: Path to the PDF file
+        start_page: Page number to start extraction (0-indexed). If None, starts from first page.
+        end_page: Page number to end extraction (0-indexed, inclusive). If None, ends at start_page if specified, otherwise extracts all pages.
+        
+    Returns:
+        If extracting a single page: string containing the page text
+        If extracting multiple pages: dictionary mapping page numbers to page text
+    """
+    try:
+        doc = fitz.open(pdf_path)
+        total_pages = len(doc)
+        
+        # Validate page parameters
+        if start_page is not None and (start_page < 0 or start_page >= total_pages):
+            raise ValueError(f"Start page {start_page} is out of range (0-{total_pages-1})")
+            
+        if end_page is not None and (end_page < 0 or end_page >= total_pages):
+            raise ValueError(f"End page {end_page} is out of range (0-{total_pages-1})")
+            
+        # Set defaults if parameters are None
+        if start_page is None:
+            start_page = 0
+            
+        if end_page is None:
+            if start_page is not None:
+                end_page = start_page
+            else:
+                end_page = total_pages - 1
+                
+        # Ensure start_page <= end_page
+        if start_page > end_page:
+            start_page, end_page = end_page, start_page
+        
+        # Extract text
+        if start_page == end_page:
+            # Single page extraction
+            page = doc[start_page]
+            text = page.get_text()
+            doc.close()
+            return text
+        else:
+            # Multiple page extraction
+            result = {}
+            for page_num in range(start_page, end_page + 1):
+                page = doc[page_num]
+                result[page_num] = page.get_text()
+            
+            doc.close()
+            return result
+    except Exception as e:
+        raise Exception(f"Error extracting text: {str(e)}")
+
+
+@mcp.tool()
+def search_text(pdf_path: str, pattern: str, case_sensitive: bool = False, start_page: Optional[int] = None, end_page: Optional[int] = None) -> List[Dict[str, Any]]:
+    """
+    Search for text pattern in a PDF file
+    
+    Args:
+        pdf_path: Path to the PDF file
+        pattern: Regular expression pattern to search for
+        case_sensitive: Whether to perform case-sensitive matching
+        start_page: Page number to start search (0-indexed). If None, starts from first page.
+        end_page: Page number to end search (0-indexed, inclusive). If None, searches all pages.
+        
+    Returns:
+        List of matches with page number, match text, and context
+    """
+    try:
+        doc = fitz.open(pdf_path)
+        total_pages = len(doc)
+        
+        # Validate page parameters
+        if start_page is not None and (start_page < 0 or start_page >= total_pages):
+            raise ValueError(f"Start page {start_page} is out of range (0-{total_pages-1})")
+            
+        if end_page is not None and (end_page < 0 or end_page >= total_pages):
+            raise ValueError(f"End page {end_page} is out of range (0-{total_pages-1})")
+            
+        # Set defaults if parameters are None
+        if start_page is None:
+            start_page = 0
+            
+        if end_page is None:
+            end_page = total_pages - 1
+            
+        # Ensure start_page <= end_page
+        if start_page > end_page:
+            start_page, end_page = end_page, start_page
+        
+        # Compile regex pattern
+        flags = 0 if case_sensitive else re.IGNORECASE
+        regex = re.compile(pattern, flags)
+        
+        # List to store matches
+        matches = []
+        
+        # Character context window
+        context_size = 50
+        
+        # Search pages
+        for page_num in range(start_page, end_page + 1):
+            page = doc[page_num]
+            text = page.get_text()
+            
+            # Find all matches in the page text
+            for match in regex.finditer(text):
+                start_pos = match.start()
+                end_pos = match.end()
+                match_text = match.group()
+                
+                # Extract context around match
+                context_start = max(0, start_pos - context_size)
+                context_end = min(len(text), end_pos + context_size)
+                
+                # Get text before and after match
+                before = text[context_start:start_pos]
+                after = text[end_pos:context_end]
+                
+                # Add match information to results
+                matches.append({
+                    "page": page_num,
+                    "match": match_text,
+                    "context": f"...{before}{match_text}{after}...",
+                    "position": {
+                        "start": start_pos,
+                        "end": end_pos
+                    }
+                })
+        
+        doc.close()
+        return matches
+    except Exception as e:
+        raise Exception(f"Error searching text: {str(e)}")
 
 
 
