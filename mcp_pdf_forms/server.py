@@ -73,13 +73,25 @@ def extract_form_fields(pdf_path: str) -> Dict[str, Any]:
                 field_type = widget.field_type
                 field_type_name = widget.field_type_string
 
+                field_info = {
+                    "type": field_type_name.lower(),
+                    "value": field_value,
+                    "field_type_id": field_type,
+                }
+                
+                # Extract options for radio buttons (field_type 3) and choice fields
+                if field_type == 3:  # Radio button / choice field
+                    try:
+                        # Get the field options
+                        field_options = widget.choice_values
+                        if field_options:
+                            field_info["options"] = field_options
+                    except AttributeError:
+                        pass
+
                 # Only add if not already in results
                 if field_name not in result:
-                    result[field_name] = {
-                        "type": field_type_name.lower(),
-                        "value": field_value,
-                        "field_type_id": field_type,
-                    }
+                    result[field_name] = field_info
 
         doc.close()
         return result
