@@ -64,8 +64,33 @@ def extract_form_fields(pdf_path: str) -> Dict[str, Any]:
     try:
         doc = fitz.open(pdf_path)
         result = {}
+        radio_button_options = {}  # To collect radio button states
 
-        # Get form fields using widget iteration
+        # First pass: collect all radio button options
+        for page in doc:
+            for widget in page.widgets():
+                field_name = widget.field_name
+                field_type = widget.field_type
+                
+                # Collect radio button options
+                if field_type == 5:  # RadioButton
+                    if field_name not in radio_button_options:
+                        radio_button_options[field_name] = set()
+                    
+                    try:
+                        # Get button states from the widget
+                        states = widget.button_states()
+                        if states and 'normal' in states:
+                            # Add all non-'Off' options to our set
+                            for state in states['normal']:
+                                if state != 'Off':
+                                    # Replace HTML entity codes with actual characters
+                                    option = state.replace('#20', ' ')
+                                    radio_button_options[field_name].add(option)
+                    except Exception:
+                        pass
+
+        # Second pass: extract all form fields
         for page in doc:
             for widget in page.widgets():
                 field_name = widget.field_name
@@ -79,8 +104,14 @@ def extract_form_fields(pdf_path: str) -> Dict[str, Any]:
                     "field_type_id": field_type,
                 }
                 
-                # Extract options for radio buttons (field_type 3) and choice fields
-                if field_type == 3:  # Radio button / choice field
+                # Add radio button options
+                if field_type == 5 and field_name in radio_button_options:
+                    options = list(radio_button_options[field_name])
+                    if options:
+                        field_info["options"] = options
+                
+                # Add choice field options (combobox, listbox)
+                elif field_type == 3:  # Choice field
                     try:
                         # Get the field options
                         field_options = widget.choice_values

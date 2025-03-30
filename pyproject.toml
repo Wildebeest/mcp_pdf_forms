@@ -1,6 +1,6 @@
 [project]
 name = "mcp_pdf_forms"
-version = "0.1.4"
+version = "0.2.0"
 description = "PDF form manipulation toolkit built with MCP and PyMuPDF"
 readme = "README.md"
 requires-python = ">=3.11"

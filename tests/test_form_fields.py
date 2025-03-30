@@ -20,6 +20,25 @@ def test_filing_status_field_exists(dor_form_fields):
     
     # Verify the field type ID is correct (5 is for radio buttons)
     assert dor_form_fields["filing status"]["field_type_id"] == 5
+    
+    # Verify that options are correctly extracted
+    assert "options" in dor_form_fields["filing status"]
+    options = dor_form_fields["filing status"]["options"]
+    
+    # Check that all expected filing status options are present
+    expected_options = [
+        "Single", 
+        "Married filing joint return", 
+        "Married filing separate return", 
+        "Head of household"
+    ]
+    
+    # The order might be different, so just make sure all expected options are in the list
+    for option in expected_options:
+        assert option in options
+        
+    # Check that we have exactly the expected number of options
+    assert len(options) == len(expected_options)
 
 def test_personal_info_fields_exist(dor_form_fields):
     """Test that personal information fields are correctly extracted"""
@@ -49,3 +68,17 @@ def test_direct_deposit_field(dor_form_fields):
     # Verify it's a radio button
     assert dor_form_fields["direct deposit"]["type"] == "radiobutton"
     assert dor_form_fields["direct deposit"]["field_type_id"] == 5
+    
+    # Verify that options are correctly extracted
+    assert "options" in dor_form_fields["direct deposit"]
+    options = dor_form_fields["direct deposit"]["options"]
+    
+    # Check that all expected direct deposit options are present
+    expected_options = ["Checking", "Savings"]
+    
+    # The order might be different, so just make sure all expected options are in the list
+    for option in expected_options:
+        assert option in options
+        
+    # Check that we have exactly the expected number of options
+    assert len(options) == len(expected_options)
