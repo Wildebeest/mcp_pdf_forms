@@ -1,6 +1,6 @@
 [project]
 name = "mcp_pdf_forms"
-version = "0.1.3"
+version = "0.1.4"
 description = "PDF form manipulation toolkit built with MCP and PyMuPDF"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -14,6 +14,8 @@ dependencies = [
     "pillow>=11.1.0",
 ]
 
+[project.scripts]
+mcp-pdf-forms = "mcp_pdf_forms.server:start_server"
 
 [project.urls]
 Repository = "https://github.com/Wildebeest/mcp_pdf_forms"
