@@ -20,6 +20,21 @@ cd mcp_pdf_forms
 pip install -e .
 ```
 
+## Command Line Tool
+
+After installation, you can use the `mcp-pdf-forms` command to start the server:
+
+```bash
+# Start the server with one or more directories to scan for PDFs
+mcp-pdf-forms examples
+```
+
+You can also add it to Claude Code as an MCP:
+
+```bash
+claude mcp add pdf-forms mcp-pdf-forms .
+```
+
 ## Server
 
 The server component provides PDF-related tools via MCP's API:
