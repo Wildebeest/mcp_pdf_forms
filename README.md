@@ -34,22 +34,6 @@ You can also add it to Claude Code as an MCP:
 ```bash
 claude mcp add pdf-forms mcp-pdf-forms .
 ```
-
-## Server
-
-The server component provides PDF-related tools via MCP's API:
-
-```bash
-# Start the server with one or more directories to scan for PDFs
-uv run -m mcp_pdf_forms.server examples
-```
-
-Or to add to claude-code:
-
-```bash
-claude mcp add pdf-forms uv run -- --with mcp-pdf-forms -m mcp_pdf_forms.server .
-```
-
 ## Usage
 
 Once installed, you can use the package to work with PDF forms. The package provides tools through the MCP interface.
