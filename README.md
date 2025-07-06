@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/wildebeest-mcp-pdf-forms-badge.png)](https://mseep.ai/app/wildebeest-mcp-pdf-forms)
+
 # MCP PDF Forms
 
 A PDF form manipulation toolkit built with [MCP](https://github.com/llama-index-ai/mcp) and PyMuPDF.
