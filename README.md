@@ -2,6 +2,10 @@
 
 A PDF form manipulation toolkit built with [MCP](https://github.com/llama-index-ai/mcp) and PyMuPDF.
 
+<a href="https://glama.ai/mcp/servers/@Wildebeest/mcp_pdf_forms">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@Wildebeest/mcp_pdf_forms/badge" alt="PDF Forms MCP server" />
+</a>
+
 ## Features
 
 - Find PDF files across multiple directories
